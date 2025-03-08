@@ -1,6 +1,10 @@
-// Chapter 13: Error Handling in Next.js Server Actions
-// This file contains server actions for invoice management with proper error handling
-// Each action includes database error logging and user-friendly error messages
+// Chapter 14: Form Validation and Error Handling in Next.js
+// This file implements server-side form validation using Zod and proper error handling
+// Features:
+// - Custom error messages for form fields
+// - Validation for required fields and data types
+// - Proper error state management with useFormState
+// - Database error handling with user-friendly messages
 
 'use server';
  
@@ -15,34 +19,60 @@ const sql = postgres(process.env.POSTGRES_URL!, { ssl: 'require' });
 // Form validation schemas
 const FormSchema = z.object({
   id: z.string(),
-  customerId: z.string(),
-  amount: z.coerce.number(),
-  status: z.enum(['pending', 'paid']),
+  customerId: z.string({
+    invalid_type_error: 'Please select a customer name.',
+    required_error: 'Please select a customer.',
+  }),
+  amount: z.coerce
+    .number()
+    .gt(0, { message: 'Please enter an amount greater than $0.' }),
+  status: z.enum(['pending', 'paid'], {
+    required_error: 'Please select an invoice status.',
+    invalid_type_error: 'Please select an invoice status.',
+  }),
   date: z.string(),
 });
 
 const CreateInvoice = FormSchema.omit({ id: true, date: true });
 const UpdateInvoice = FormSchema.omit({ id: true, date: true });
 
-// Create a new invoice with error handling
-export async function createInvoice(formData: FormData) {
-  const { customerId, amount, status } = CreateInvoice.parse({
-    customerId: formData.get('customerId'),
-    amount: formData.get('amount'),
-    status: formData.get('status'),
-  });
+// Define the shape of validation errors
+export type State = {
+  errors?: {
+    customerId?: string[];
+    amount?: string[];
+    status?: string[];
+  };
+  message?: string | null;
+};
 
-  const amountInCents = amount * 100;
-  const date = new Date().toISOString().split('T')[0];
- 
+// Create a new invoice with error handling
+export async function createInvoice(prevState: State, formData: FormData) {
   try {
+    const validatedFields = CreateInvoice.parse({
+      customerId: formData.get('customerId'),
+      amount: formData.get('amount'),
+      status: formData.get('status'),
+    });
+
+    const { customerId, amount, status } = validatedFields;
+    const amountInCents = amount * 100;
+    const date = new Date().toISOString().split('T')[0];
+ 
     await sql`
       INSERT INTO invoices (customer_id, amount, status, date)
       VALUES (${customerId}, ${amountInCents}, ${status}, ${date})
     `;
   } catch (error) {
-    console.error('Database Error:', error);
-    throw new Error('Failed to create invoice.');
+    if (error instanceof z.ZodError) {
+      return {
+        errors: error.flatten().fieldErrors,
+        message: 'Missing Fields. Failed to Create Invoice.',
+      };
+    }
+    return {
+      message: 'Database Error: Failed to Create Invoice.',
+    };
   }
  
   revalidatePath('/dashboard/invoices');
@@ -50,24 +80,32 @@ export async function createInvoice(formData: FormData) {
 }
 
 // Update an existing invoice with error handling
-export async function updateInvoice(id: string, formData: FormData) {
-  const { customerId, amount, status } = UpdateInvoice.parse({
-    customerId: formData.get('customerId'),
-    amount: formData.get('amount'),
-    status: formData.get('status'),
-  });
-
-  const amountInCents = amount * 100;
-
+export async function updateInvoice(id: string, prevState: State, formData: FormData) {
   try {
+    const validatedFields = UpdateInvoice.parse({
+      customerId: formData.get('customerId'),
+      amount: formData.get('amount'),
+      status: formData.get('status'),
+    });
+
+    const { customerId, amount, status } = validatedFields;
+    const amountInCents = amount * 100;
+
     await sql`
       UPDATE invoices
       SET customer_id = ${customerId}, amount = ${amountInCents}, status = ${status}
       WHERE id = ${id}
     `;
   } catch (error) {
-    console.error('Database Error:', error);
-    throw new Error('Failed to update invoice.');
+    if (error instanceof z.ZodError) {
+      return {
+        errors: error.flatten().fieldErrors,
+        message: 'Missing Fields. Failed to Update Invoice.',
+      };
+    }
+    return {
+      message: 'Database Error: Failed to Update Invoice.',
+    };
   }
 
   revalidatePath('/dashboard/invoices');
@@ -79,8 +117,9 @@ export async function deleteInvoice(id: string) {
   try {
     await sql`DELETE FROM invoices WHERE id = ${id}`;
   } catch (error) {
-    console.error('Database Error:', error);
-    throw new Error('Failed to delete invoice.');
+    return {
+      message: 'Database Error: Failed to Delete Invoice.',
+    };
   }
   
   revalidatePath('/dashboard/invoices');
