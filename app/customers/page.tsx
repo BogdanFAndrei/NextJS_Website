@@ -4,22 +4,14 @@ import { fetchFilteredCustomers } from '@/app/lib/data';
 import { Suspense } from 'react';
 import CustomersTable from '@/app/ui/customers/table';
 import { Metadata } from 'next';
-import Search from '@/app/ui/search';
 
 export const metadata: Metadata = {
-  title: 'Customer Portal',
+  title: 'Portal',
 };
 
-export default async function CustomerPortalPage({
-  searchParams,
-}: {
-  searchParams?: {
-    query?: string;
-  };
-}) {
+export default async function CustomerPortalPage() {
   const session = await auth();
-  const query = searchParams?.query || '';
-  const customers = await fetchFilteredCustomers(query);
+  const customers = await fetchFilteredCustomers('');
 
   return (
     <main className="flex min-h-screen flex-col p-6">
@@ -33,7 +25,6 @@ export default async function CustomerPortalPage({
         </div>
       </div>
       <div className="mt-4 flex grow flex-col gap-4">
-        <Search placeholder="Search..." />
         <Suspense>
           <CustomersTable customers={customers} />
         </Suspense>
