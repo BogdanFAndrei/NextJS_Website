@@ -11,15 +11,17 @@ async function seedUsers() {
       id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
       name VARCHAR(255) NOT NULL,
       email TEXT NOT NULL UNIQUE,
-      password TEXT NOT NULL
+      password TEXT NOT NULL,
+      role VARCHAR(50) NOT NULL DEFAULT 'admin'
     );
   `;
 
   const insertedUsers = await Promise.all(
     users.map(async (user) => {
+      const hashedPassword = await bcrypt.hash(user.password, 10);
       return sql`
-        INSERT INTO users (id, name, email, password)
-        VALUES (${user.id}, ${user.name}, ${user.email}, ${user.password})
+        INSERT INTO users (id, name, email, password, role)
+        VALUES (${user.id}, ${user.name}, ${user.email}, ${hashedPassword}, 'admin')
         ON CONFLICT (id) DO NOTHING;
       `;
     }),
@@ -61,19 +63,22 @@ async function seedCustomers() {
     CREATE TABLE IF NOT EXISTS customers (
       id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
       name VARCHAR(255) NOT NULL,
-      email VARCHAR(255) NOT NULL,
-      image_url VARCHAR(255) NOT NULL
+      email VARCHAR(255) NOT NULL UNIQUE,
+      image_url VARCHAR(255) NOT NULL,
+      password TEXT NOT NULL,
+      role VARCHAR(50) NOT NULL DEFAULT 'customer'
     );
   `;
 
   const insertedCustomers = await Promise.all(
-    customers.map(
-      (customer) => sql`
-        INSERT INTO customers (id, name, email, image_url)
-        VALUES (${customer.id}, ${customer.name}, ${customer.email}, ${customer.image_url})
+    customers.map(async (customer) => {
+      const hashedPassword = await bcrypt.hash(customer.password, 10);
+      return sql`
+        INSERT INTO customers (id, name, email, image_url, password, role)
+        VALUES (${customer.id}, ${customer.name}, ${customer.email}, ${customer.image_url}, ${hashedPassword}, 'customer')
         ON CONFLICT (id) DO NOTHING;
-      `,
-    ),
+      `;
+    }),
   );
 
   return insertedCustomers;
@@ -102,15 +107,16 @@ async function seedRevenue() {
 
 export async function GET() {
   try {
-    const result = await sql.begin((sql) => [
-      seedUsers(),
-      seedCustomers(),
-      seedInvoices(),
-      seedRevenue(),
-    ]);
+    await sql.begin(async (sql) => {
+      await seedUsers();
+      await seedCustomers();
+      await seedInvoices();
+      await seedRevenue();
+    });
 
     return Response.json({ message: 'Database seeded successfully' });
   } catch (error) {
-    return Response.json({ error }, { status: 500 });
+    console.error('Error seeding database:', error);
+    return Response.json({ error: 'Error seeding database' }, { status: 500 });
   }
 }
