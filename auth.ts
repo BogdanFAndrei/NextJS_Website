@@ -1,3 +1,13 @@
+/**
+ * NextAuth.js Authentication Implementation
+ * 
+ * This file implements the core authentication logic using NextAuth.js.
+ * It provides:
+ * - User authentication with email/password
+ * - Role-based user management (admin/customer)
+ * - Database integration for user verification
+ */
+
 import NextAuth from 'next-auth';
 import Credentials from 'next-auth/providers/credentials';
 import { authConfig } from './auth.config';
@@ -6,8 +16,16 @@ import type { User } from '@/app/lib/definitions';
 import bcrypt from 'bcrypt';
 import postgres from 'postgres';
 
+// Initialize database connection
 const sql = postgres(process.env.POSTGRES_URL!, { ssl: 'require' });
 
+/**
+ * Fetches user data from the database based on email
+ * Checks both admin and customer tables
+ * 
+ * @param email - The email address to look up
+ * @returns User object if found, undefined otherwise
+ */
 async function getUser(email: string): Promise<User | undefined> {
   try {
     // First try to find in users table (admins)
@@ -32,17 +50,21 @@ async function getUser(email: string): Promise<User | undefined> {
   }
 }
 
+// Configure NextAuth with credentials provider
 export const { auth, signIn, signOut } = NextAuth({
   ...authConfig,
   providers: [
     Credentials({
       async authorize(credentials) {
+        // Validate credentials format
         const parsedCredentials = z
           .object({ email: z.string().email(), password: z.string().min(6) })
           .safeParse(credentials);
 
         if (parsedCredentials.success) {
           const { email, password } = parsedCredentials.data;
+          
+          // Fetch user and verify password
           const user = await getUser(email);
           if (!user) return null;
           const passwordsMatch = await bcrypt.compare(password, user.password);

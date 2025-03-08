@@ -1,3 +1,9 @@
+/**
+ * Authentication Configuration for Next.js Application
+ * This file contains the core authentication configuration using NextAuth.js
+ * It handles role-based access control (RBAC) for admin and customer users
+ */
+
 import type { NextAuthConfig } from 'next-auth';
 
 export const authConfig = {
@@ -24,45 +30,45 @@ export const authConfig = {
       const isOnLoginPage = nextUrl.pathname === '/login';
       const isOnRootPage = nextUrl.pathname === '/';
       
-      // Allow access to root page and login page without authentication
+      // Public routes - allow access without authentication
       if (isOnRootPage || isOnLoginPage) return true;
 
-      // If user is logged in and tries to access login page, redirect based on role
+      // Redirect authenticated users from login page based on their role
       if (isLoggedIn && isOnLoginPage) {
         return auth?.user?.role === 'customer'
           ? Response.redirect(new URL('/customers', nextUrl))
           : Response.redirect(new URL('/dashboard', nextUrl));
       }
 
-      // Handle customer routes
+      // Customer portal access control
       if (isOnCustomerPage) {
         if (!isLoggedIn) {
           return Response.redirect(new URL('/login', nextUrl));
         }
-        // Allow customers to access their pages
+        // Only allow customers to access their portal
         if (auth?.user?.role === 'customer') {
           return true;
         }
-        // Redirect admins to dashboard
+        // Redirect admins to their dashboard
         return Response.redirect(new URL('/dashboard', nextUrl));
       }
 
-      // Handle dashboard routes
+      // Admin dashboard access control
       if (isOnDashboard) {
         if (!isLoggedIn) {
           return Response.redirect(new URL('/login', nextUrl));
         }
-        // Allow admins to access dashboard
+        // Only allow admins to access dashboard
         if (auth?.user?.role === 'admin') {
           return true;
         }
-        // Redirect customers to their page
+        // Redirect customers to their portal
         return Response.redirect(new URL('/customers', nextUrl));
       }
 
-      // Default allow access to other routes
+      // Default to allowing access for other routes
       return true;
     },
   },
-  providers: [], // Add providers with an empty array for now
+  providers: [], // Providers are configured in auth.ts
 } satisfies NextAuthConfig; 
