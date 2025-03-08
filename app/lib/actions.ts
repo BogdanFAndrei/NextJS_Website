@@ -12,7 +12,7 @@ import { z } from 'zod';
 import postgres from 'postgres';
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
-import { signIn } from '@/auth';
+import { signIn, signOut } from '@/auth';
 import { AuthError } from 'next-auth';
 
 // Database connection
@@ -145,5 +145,18 @@ export async function authenticate(
     }
     throw error;
   }
+}
+
+/**
+ * Handles user sign out with proper redirection
+ */
+export async function signOutAction() {
+  'use server';
+  try {
+    await signOut();
+  } catch (error) {
+    console.error('Sign out error:', error);
+  }
+  redirect('/');
 }
 

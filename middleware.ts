@@ -26,5 +26,8 @@ export const config = {
     
     // Protect customer portal routes
     '/customers/:path*',
+    
+    // Include auth-related routes
+    '/api/auth/:path*',
   ],
 }; 
