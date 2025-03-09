@@ -15,7 +15,7 @@ import { useRef } from 'react';
 import { State } from '@/app/lib/actions';
 
 export default function Form({ customers }: { customers: CustomerField[] }) {
-  const initialState: State = { message: '', errors: { customerId: [], amount: [], status: [] } };
+  const initialState: State = { message: '', errors: {} };
   const [state, dispatch] = useActionState(createInvoice, initialState);
   const formRef = useRef<HTMLFormElement>(null);
 

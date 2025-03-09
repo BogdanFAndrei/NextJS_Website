@@ -41,10 +41,8 @@ const UpdateInvoice = FormSchema.omit({ id: true, date: true });
 
 // Define the shape of validation errors
 export type State = {
-  errors: {
-    customerId?: string[];
-    amount?: string[];
-    status?: string[];
+  errors?: {
+    [key: string]: string[] | undefined;
   };
   message: string;
 };

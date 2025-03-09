@@ -12,14 +12,13 @@ export const metadata: Metadata = {
   title: 'Customers',
 };
 
-export default async function Page({
-  searchParams,
-}: {
-  searchParams?: {
+export default async function Page(props: {
+  searchParams?: Promise<{
     query?: string;
     sort?: string;
-  };
+  }>;
 }) {
+  const searchParams = await props.searchParams;
   const query = searchParams?.query || '';
   const sort = searchParams?.sort || 'name-asc';
   const customers = await fetchAllCustomers(query, sort);

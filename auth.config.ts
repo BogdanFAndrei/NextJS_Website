@@ -5,6 +5,11 @@
  */
 
 import type { NextAuthConfig } from 'next-auth';
+import type { JWT } from 'next-auth/jwt';
+
+interface ExtendedToken extends JWT {
+  role?: 'admin' | 'customer';
+}
 
 export const authConfig = {
   pages: {
@@ -17,7 +22,7 @@ export const authConfig = {
       }
       return token;
     },
-    async session({ session, token }) {
+    async session({ session, token }: { session: any; token: ExtendedToken }) {
       if (session?.user) {
         session.user.role = token.role;
       }
