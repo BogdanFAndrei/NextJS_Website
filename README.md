@@ -7,7 +7,7 @@ A modern web application built with Next.js 14, showcasing various test framewor
 - Modern Stack: Built with Next.js 14 and React 19
 - Authentication: Secure user authentication system using NextAuth.js
 - Responsive Design: Mobile-first approach with a fully responsive layout
-- UI Components: Utilizes Tailwind CSS for modern, clean UI design
+- UI Components: Utilises Tailwind CSS for modern, clean UI design
 - Form Handling: Implements @tailwindcss/forms for consistent form styling
 - Icons: Integrated with Heroicons for beautiful, scalable icons
 
@@ -65,7 +65,7 @@ The website is fully responsive and optimized for:
 
 ## Author
 
-- Bogdan F Andrei
+- Bogdan Andrei
 - GitHub: [@BogdanFAndrei](https://github.com/BogdanFAndrei)
 
 ## Acknowledgments
