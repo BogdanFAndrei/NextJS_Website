@@ -1,6 +1,6 @@
 # Next.js Test Framework Demo Website
 
-A modern web application built with Next.js 14, showcasing various test frameworks and best practices in web development. This project serves as a demonstration platform for implementing and comparing different testing methodologies.
+A modern web application built with Next.js 14, showcasing various test frameworks and best practices in web development. This project serves as a demonstration platform for implementing and comparing different testing methodologies. The application is deployed on Vercel and uses PostgreSQL for data management.
 
 ## Features
 
@@ -10,6 +10,8 @@ A modern web application built with Next.js 14, showcasing various test framewor
 - UI Components: Utilises Tailwind CSS for modern, clean UI design
 - Form Handling: Implements @tailwindcss/forms for consistent form styling
 - Icons: Integrated with Heroicons for beautiful, scalable icons
+- Database Integration: Fully functional PostgreSQL database hosted on Vercel
+- Production Deployment: Successfully deployed and running on Vercel platform
 
 ## Tech Stack
 
@@ -17,9 +19,30 @@ A modern web application built with Next.js 14, showcasing various test framewor
 - Language: [TypeScript](https://www.typescriptlang.org/)
 - Styling: [Tailwind CSS](https://tailwindcss.com/)
 - Authentication: [NextAuth.js](https://next-auth.js.org/)
-- Database: PostgreSQL
+- Database: PostgreSQL with Vercel Postgres integration
 - Icons: [Heroicons](https://heroicons.com/)
 - Package Manager: [pnpm](https://pnpm.io/)
+- Deployment: Vercel Platform with automatic deployments
+
+## Database Features
+
+The application includes a robust database system with:
+- Customer management system
+- Invoice tracking and processing
+- Revenue analytics and reporting
+- Secure data storage with Vercel Postgres
+- Automated database seeding for testing
+- Real-time data synchronization
+
+## Deployment Status
+
+The application is successfully deployed on Vercel with:
+- Automatic deployments from main branch
+- Environment variable configuration
+- Database connection and management
+- Serverless functions integration
+- API routes implementation
+- Static and dynamic page generation
 
 ## Installation
 
@@ -104,6 +127,16 @@ All UI components are built using:
 - Context API for theme management
 - Dynamic class generation for theme-specific styling
 
+## Production Features
+
+The application is running in production with:
+- Optimized build performance
+- Server-side rendering
+- API route optimization
+- Database connection pooling
+- Automatic HTTPS encryption
+- Asset optimization and caching
+
 ## Author
 
 - Bogdan Andrei
@@ -112,5 +145,5 @@ All UI components are built using:
 ## Acknowledgments
 
 - Next.js team for the amazing framework
-- Vercel for the deployment platform
+- Vercel for the deployment platform and database services
 - Tailwind CSS team for the styling framework
