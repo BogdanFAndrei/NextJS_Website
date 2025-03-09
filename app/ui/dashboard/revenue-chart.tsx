@@ -4,6 +4,7 @@ import { generateYAxis } from '@/app/lib/utils';
 import { CalendarIcon } from '@heroicons/react/24/outline';
 import { lusitana } from '@/app/ui/fonts';
 import { useTheme } from '@/app/context/ThemeContext';
+import clsx from 'clsx';
 
 // This component is representational only.
 // For data visualization UI, check out:
@@ -47,7 +48,12 @@ export default function RevenueChart({ revenue }: { revenue: any[] }) {
             {sortedRevenue.map((month) => (
               <div key={month.month} className="flex flex-col items-center gap-2">
                 <div
-                  className={`w-full rounded-md bg-${theme.primary}-300 hover:bg-${theme.primary}-400 transition-colors`}
+                  className={clsx(
+                    'w-full rounded-md transition-all duration-200',
+                    {
+                      [`bg-${theme.primary}-300 hover:bg-${theme.primary}-400`]: true
+                    }
+                  )}
                   style={{
                     height: `${(chartHeight / topLabel) * month.revenue}px`,
                   }}
