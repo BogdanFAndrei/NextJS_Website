@@ -65,7 +65,7 @@ The website is fully responsive and optimized for:
 
 ## Author
 
-- Bogdan F Andrei
+- Bogdan Andrei
 - GitHub: [@BogdanFAndrei](https://github.com/BogdanFAndrei)
 
 ## Acknowledgments
