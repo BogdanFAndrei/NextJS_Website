@@ -5,6 +5,7 @@ import clsx from 'clsx';
 import Link from 'next/link';
 import { generatePagination } from '@/app/lib/utils';
 import { usePathname, useSearchParams } from 'next/navigation';
+import { useTheme } from '@/app/context/ThemeContext';
 
 export default function Pagination({ totalPages }: { totalPages: number }) {
   // NOTE: Uncomment this code in Chapter 11
@@ -12,6 +13,7 @@ export default function Pagination({ totalPages }: { totalPages: number }) {
   const searchParams = useSearchParams();
   const currentPage = Number(searchParams.get('page')) || 1;
   const allPages = generatePagination(currentPage, totalPages);
+  const { theme } = useTheme();
 
   const createPageURL = (pageNumber: number | string) => {
     const params = new URLSearchParams(searchParams);
@@ -45,6 +47,7 @@ export default function Pagination({ totalPages }: { totalPages: number }) {
                 page={page}
                 position={position}
                 isActive={currentPage === page}
+                theme={theme}
               />
             );
           })}
@@ -65,19 +68,21 @@ function PaginationNumber({
   href,
   isActive,
   position,
+  theme,
 }: {
   page: number | string;
   href: string;
   position?: 'first' | 'last' | 'middle' | 'single';
   isActive: boolean;
+  theme: any;
 }) {
   const className = clsx(
     'flex h-10 w-10 items-center justify-center text-sm border',
     {
       'rounded-l-md': position === 'first' || position === 'single',
       'rounded-r-md': position === 'last' || position === 'single',
-      'z-10 bg-blue-600 border-blue-600 text-white': isActive,
-      'hover:bg-gray-100': !isActive && position !== 'middle',
+      [`z-10 bg-${theme.primary}-600 border-${theme.primary}-600 text-white`]: isActive,
+      [`hover:bg-${theme.primary}-100`]: !isActive && position !== 'middle',
       'text-gray-300': position === 'middle',
     },
   );
