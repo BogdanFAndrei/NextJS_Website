@@ -62,6 +62,48 @@ The website is fully responsive and optimized for:
 - Tablets
 - Mobile phones
 
+## UI Components and Theming
+
+The application features a comprehensive set of modern UI components with dynamic theming support:
+
+### Theme System
+- Dynamic theme switching capability
+- Multiple color schemes (Light/Dark modes)
+- Customizable primary colors
+- Consistent styling across all components
+
+### Core Components
+- **Navigation Bar**
+  - Responsive layout
+  - Dynamic highlighting for active routes
+  - Smooth hover transitions
+  - Theme-aware styling
+
+- **Dashboard Components**
+  - Revenue Chart with interactive hover effects
+  - Theme-aware data visualization
+  - Responsive card layouts
+  - Dynamic loading states
+
+- **Interactive Elements**
+  - Theme-aware buttons with hover effects
+  - "Add Customer" button with dynamic styling
+  - Form inputs with consistent theming
+  - Interactive pagination controls
+
+### Styling Features
+- Seamless theme transitions
+- Consistent color palette across components
+- Accessible color contrasts
+- Responsive design patterns
+- Modern hover and focus states
+
+### Implementation
+All UI components are built using:
+- Tailwind CSS for styling
+- CSS Modules for component-specific styles
+- Context API for theme management
+- Dynamic class generation for theme-specific styling
 
 ## Author
 
