@@ -10,13 +10,13 @@ import {
 } from '@heroicons/react/24/outline';
 import { Button } from '@/app/ui/button';
 import { createInvoice } from '@/app/lib/actions';
-import { useFormState } from 'react-dom';
+import { useActionState } from 'react';
 import { useRef } from 'react';
 import { State } from '@/app/lib/actions';
 
 export default function Form({ customers }: { customers: CustomerField[] }) {
-  const initialState: State = { message: null, errors: {} };
-  const [state, dispatch] = useFormState(createInvoice, initialState);
+  const initialState: State = { message: '', errors: { customerId: [], amount: [], status: [] } };
+  const [state, dispatch] = useActionState(createInvoice, initialState);
   const formRef = useRef<HTMLFormElement>(null);
 
   return (

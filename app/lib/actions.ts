@@ -14,6 +14,7 @@ import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { signIn, signOut } from '@/auth';
 import { AuthError } from 'next-auth';
+import bcrypt from 'bcrypt';
 
 // Database connection
 const sql = postgres(process.env.POSTGRES_URL!, { ssl: 'require' });
@@ -40,12 +41,12 @@ const UpdateInvoice = FormSchema.omit({ id: true, date: true });
 
 // Define the shape of validation errors
 export type State = {
-  errors?: {
+  errors: {
     customerId?: string[];
     amount?: string[];
     status?: string[];
   };
-  message?: string | null;
+  message: string;
 };
 
 // Create a new invoice with error handling
@@ -153,10 +154,61 @@ export async function authenticate(
 export async function signOutAction() {
   'use server';
   try {
-    await signOut();
+    await signOut({ 
+      redirectTo: '/'
+    });
   } catch (error) {
     console.error('Sign out error:', error);
+    throw error;
   }
-  redirect('/');
+}
+
+export type CustomerState = {
+  errors?: {
+    name?: string[];
+    email?: string[];
+  };
+  message?: string | null;
+};
+
+export async function createCustomer(prevState: CustomerState, formData: FormData) {
+  try {
+    const validationSchema = z.object({
+      name: z.string().min(1, 'Please enter a customer name'),
+      email: z.string().email('Please enter a valid email address'),
+    });
+
+    const data = {
+      name: formData.get('name'),
+      email: formData.get('email'),
+    };
+
+    const validatedFields = validationSchema.safeParse(data);
+
+    if (!validatedFields.success) {
+      return {
+        errors: validatedFields.error.flatten().fieldErrors,
+        message: 'Missing Fields. Failed to Create Customer.',
+      };
+    }
+
+    const { name, email } = validatedFields.data;
+    const image_url = '/customers/evil-rabbit.png'; // Default evil rabbit image
+    const defaultPassword = '123456';
+    const hashedPassword = await bcrypt.hash(defaultPassword, 10);
+
+    await sql`
+      INSERT INTO customers (name, email, image_url, password, role)
+      VALUES (${name}, ${email}, ${image_url}, ${hashedPassword}, 'customer')
+    `;
+
+    revalidatePath('/dashboard/customers');
+    redirect('/dashboard/customers');
+  } catch (error) {
+    console.error('Error creating customer:', error);
+    return {
+      message: error instanceof Error ? error.message : 'Database Error: Failed to Create Customer.',
+    };
+  }
 }
 

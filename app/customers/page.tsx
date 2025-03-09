@@ -11,11 +11,10 @@ import { fetchFilteredCustomers } from '@/app/lib/data';
 import { Suspense } from 'react';
 import CustomersTable from '@/app/ui/customers/table';
 import { Metadata } from 'next';
-import {  SignOutButton } from '@/app/ui/sign-out-button';
+import { SideNavSignOutButton } from '@/app/ui/sign-out-button';
 import { CreditCardIcon } from '@heroicons/react/24/outline';
 import SignOutError from '@/app/ui/sign-out-error';
 import { ErrorBoundary } from 'react-error-boundary';
-
 
 export const metadata: Metadata = {
   title: 'Portal',
@@ -43,7 +42,7 @@ export default async function CustomerPortalPage() {
               <span className="hidden md:block">Make Payment</span>
             </button>
             <ErrorBoundary FallbackComponent={SignOutError}>
-              <SignOutButton />
+              <SideNavSignOutButton />
             </ErrorBoundary>
           </div>
         </div>

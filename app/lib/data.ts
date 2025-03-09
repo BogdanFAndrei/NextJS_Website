@@ -220,3 +220,66 @@ export async function fetchFilteredCustomers(query: string) {
     throw new Error('Failed to fetch customer data.');
   }
 }
+
+export async function fetchAllCustomers(query: string = '', sortBy: string = 'name-asc') {
+  try {
+    // Define the ORDER BY clause based on sortBy parameter
+    let orderByClause = 'customers.name ASC'; // default sorting
+
+    switch (sortBy) {
+      case 'name-asc':
+        orderByClause = 'customers.name ASC';
+        break;
+      case 'name-desc':
+        orderByClause = 'customers.name DESC';
+        break;
+      case 'pending-high':
+        orderByClause = 'total_pending DESC';
+        break;
+      case 'pending-low':
+        orderByClause = 'total_pending ASC';
+        break;
+      case 'invoices-high':
+        orderByClause = 'total_invoices DESC';
+        break;
+      case 'invoices-low':
+        orderByClause = 'total_invoices ASC';
+        break;
+      case 'paid-high':
+        orderByClause = 'total_paid DESC';
+        break;
+      case 'paid-low':
+        orderByClause = 'total_paid ASC';
+        break;
+    }
+
+    const data = await sql<CustomersTableType[]>`
+      SELECT
+        customers.id,
+        customers.name,
+        customers.email,
+        customers.image_url,
+        COUNT(invoices.id) AS total_invoices,
+        SUM(CASE WHEN invoices.status = 'pending' THEN invoices.amount ELSE 0 END) AS total_pending,
+        SUM(CASE WHEN invoices.status = 'paid' THEN invoices.amount ELSE 0 END) AS total_paid
+      FROM customers
+      LEFT JOIN invoices ON customers.id = invoices.customer_id
+      WHERE
+        customers.name ILIKE ${`%${query}%`} OR
+        customers.email ILIKE ${`%${query}%`}
+      GROUP BY customers.id, customers.name, customers.email, customers.image_url
+      ORDER BY ${sql.unsafe(orderByClause)}
+    `;
+
+    const customers = data.map((customer) => ({
+      ...customer,
+      total_pending: formatCurrency(customer.total_pending),
+      total_paid: formatCurrency(customer.total_paid),
+    }));
+
+    return customers;
+  } catch (err) {
+    console.error('Database Error:', err);
+    throw new Error('Failed to fetch customer data.');
+  }
+}

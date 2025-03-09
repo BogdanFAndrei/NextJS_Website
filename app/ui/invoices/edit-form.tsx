@@ -10,7 +10,7 @@ import {
 } from '@heroicons/react/24/outline';
 import Link from 'next/link';
 import { Button } from '@/app/ui/button';
-import { useFormState } from 'react-dom';
+import { useActionState } from 'react';
 import { useRef } from 'react';
 import { State } from '@/app/lib/actions';
 
@@ -21,9 +21,9 @@ export default function EditInvoiceForm({
   invoice: InvoiceForm;
   customers: CustomerField[];
 }) {
-  const initialState: State = { message: null, errors: {} };
+  const initialState: State = { message: '', errors: { customerId: [], amount: [], status: [] } };
   const updateInvoiceWithId = updateInvoice.bind(null, invoice.id);
-  const [state, dispatch] = useFormState(updateInvoiceWithId, initialState);
+  const [state, dispatch] = useActionState(updateInvoiceWithId, initialState);
   const formRef = useRef<HTMLFormElement>(null);
 
   return (
