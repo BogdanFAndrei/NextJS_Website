@@ -14,7 +14,7 @@ import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { signIn, signOut } from '@/auth';
 import { AuthError } from 'next-auth';
-import bcrypt from 'bcrypt';
+import bcrypt from 'bcryptjs';
 
 // Database connection
 const sql = postgres(process.env.POSTGRES_URL!, { ssl: 'require' });

@@ -7,14 +7,22 @@ import { Suspense } from 'react';
 import { RevenueChartSkeleton, LatestInvoicesSkeleton, CardsSkeleton } from '@/app/ui/skeletons';
 
 export default async function Page() {
-  const revenue = await fetchRevenue();
-  const latestInvoices = await fetchLatestInvoices();
+  const [
+    revenue,
+    latestInvoices,
+    cardData
+  ] = await Promise.all([
+    fetchRevenue(),
+    fetchLatestInvoices(),
+    fetchCardData()
+  ]);
+
   const {
     numberOfInvoices,
     numberOfCustomers,
     totalPaidInvoices,
     totalPendingInvoices,
-  } = await fetchCardData();
+  } = cardData;
 
   return (
     <main>
@@ -23,7 +31,12 @@ export default async function Page() {
       </h1>
       <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
         <Suspense fallback={<CardsSkeleton />}>
-          <CardWrapper />
+          <CardWrapper 
+            numberOfInvoices={numberOfInvoices}
+            numberOfCustomers={numberOfCustomers}
+            totalPaidInvoices={totalPaidInvoices}
+            totalPendingInvoices={totalPendingInvoices}
+          />
         </Suspense>
       </div>
       <div className="mt-6 grid grid-cols-1 gap-6 md:grid-cols-4 lg:grid-cols-8">
@@ -31,7 +44,7 @@ export default async function Page() {
           <RevenueChart revenue={revenue} />
         </Suspense>
         <Suspense fallback={<LatestInvoicesSkeleton />}>
-          <LatestInvoices />
+          <LatestInvoices latestInvoices={latestInvoices} />
         </Suspense>
       </div>
     </main>
