@@ -8,6 +8,7 @@ import {
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import clsx from 'clsx';
+import { useTheme } from '@/app/context/ThemeContext';
 
 // Map of links to display in the side navigation.
 // Depending on the size of the application, this would be stored in a database.
@@ -23,6 +24,14 @@ const links = [
 
 export default function NavLinks() {
   const pathname = usePathname();
+  const themeContext = useTheme();
+
+  const linkStyle = {
+    '--theme-primary': `var(--${themeContext.theme.primary})`,
+    '--theme-hover': `var(--${themeContext.theme.hover})`,
+    '--theme-background': `var(--${themeContext.theme.background})`
+  } as React.CSSProperties;
+
   return (
     <>
       {links.map((link) => {
@@ -31,10 +40,13 @@ export default function NavLinks() {
           <Link
             key={link.name}
             href={link.href}
+            style={linkStyle}
             className={clsx(
-              "flex h-[48px] grow items-center justify-center gap-2 rounded-md bg-gray-50 p-3 text-sm font-medium hover:bg-sky-100 hover:text-blue-600 md:flex-none md:justify-start md:p-2 md:px-3",
+              'flex h-[48px] grow items-center justify-center gap-2 rounded-md p-3 text-sm font-medium text-gray-600 md:flex-none md:justify-start md:p-2 md:px-3',
+              'transition-colors duration-200',
+              'hover:bg-[var(--theme-hover)] hover:text-[var(--theme-primary)]',
               {
-                "bg-sky-100 text-blue-600": pathname === link.href,
+                'bg-[var(--theme-primary)]': pathname === link.href,
               }
             )}
           >
