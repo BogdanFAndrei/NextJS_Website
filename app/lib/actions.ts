@@ -9,15 +9,12 @@
 'use server';
  
 import { z } from 'zod';
-import postgres from 'postgres';
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { signIn, signOut } from '@/auth';
 import { AuthError } from 'next-auth';
 import bcrypt from 'bcryptjs';
-
-// Database connection
-const sql = postgres(process.env.POSTGRES_URL!, { ssl: 'require' });
+import sql from './db';
 
 // Form validation schemas
 const FormSchema = z.object({

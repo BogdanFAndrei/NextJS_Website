@@ -22,7 +22,7 @@ export const authConfig = {
       }
       return token;
     },
-    async session({ session, token }: { session: any; token: ExtendedToken }) {
+    async session({ session, token }: { session: any; token: any }) {
       if (session?.user) {
         session.user.role = token.role;
       }
@@ -33,47 +33,36 @@ export const authConfig = {
       const isOnDashboard = nextUrl.pathname.startsWith('/dashboard');
       const isOnCustomerPage = nextUrl.pathname.startsWith('/customers');
       const isOnLoginPage = nextUrl.pathname === '/login';
-      const isOnRootPage = nextUrl.pathname === '/';
       
-      // Public routes - allow access without authentication
-      if (isOnRootPage || isOnLoginPage) return true;
-
-      // Redirect authenticated users from login page based on their role
-      if (isLoggedIn && isOnLoginPage) {
-        return auth?.user?.role === 'customer'
-          ? Response.redirect(new URL('/customers', nextUrl))
-          : Response.redirect(new URL('/dashboard', nextUrl));
+      // If not logged in and trying to access protected routes
+      if (!isLoggedIn && (isOnDashboard || isOnCustomerPage)) {
+        return false; // Redirect to login
       }
 
-      // Customer portal access control
-      if (isOnCustomerPage) {
-        if (!isLoggedIn) {
-          return Response.redirect(new URL('/login', nextUrl));
+      // If logged in and trying to access login page
+      if (isLoggedIn && isOnLoginPage) {
+        // Redirect based on role
+        if (auth.user.role === 'customer') {
+          return Response.redirect(new URL('/customers', nextUrl));
         }
-        // Only allow customers to access their portal
-        if (auth?.user?.role === 'customer') {
-          return true;
-        }
-        // Redirect admins to their dashboard
         return Response.redirect(new URL('/dashboard', nextUrl));
       }
 
-      // Admin dashboard access control
-      if (isOnDashboard) {
-        if (!isLoggedIn) {
-          return Response.redirect(new URL('/login', nextUrl));
+      // Role-based access control
+      if (isLoggedIn) {
+        // Customer trying to access admin dashboard
+        if (auth.user.role === 'customer' && isOnDashboard) {
+          return Response.redirect(new URL('/customers', nextUrl));
         }
-        // Only allow admins to access dashboard
-        if (auth?.user?.role === 'admin') {
-          return true;
+        // Admin trying to access customer pages
+        if (auth.user.role === 'admin' && isOnCustomerPage) {
+          return Response.redirect(new URL('/dashboard', nextUrl));
         }
-        // Redirect customers to their portal
-        return Response.redirect(new URL('/customers', nextUrl));
       }
 
-      // Default to allowing access for other routes
       return true;
     },
   },
-  providers: [], // Providers are configured in auth.ts
+  providers: [], // configured in auth.ts
+  secret: process.env.AUTH_SECRET,
 } satisfies NextAuthConfig; 

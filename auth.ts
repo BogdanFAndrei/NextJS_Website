@@ -14,10 +14,7 @@ import { authConfig } from './auth.config';
 import { z } from 'zod';
 import type { User } from '@/app/lib/definitions';
 import bcrypt from 'bcryptjs';
-import postgres from 'postgres';
-
-// Initialize database connection
-const sql = postgres(process.env.POSTGRES_URL!, { ssl: 'require' });
+import { sql } from '@vercel/postgres';
 
 /**
  * Fetches user data from the database based on email
@@ -29,11 +26,15 @@ const sql = postgres(process.env.POSTGRES_URL!, { ssl: 'require' });
 async function getUser(email: string): Promise<User | undefined> {
   try {
     // First try to find in users table (admins)
-    const adminUser = await sql<User[]>`SELECT *, 'admin' as role FROM users WHERE email=${email}`;
-    if (adminUser[0]) return adminUser[0];
+    const adminResult = await sql<User>`
+      SELECT id, name, email, password, 'admin' as role 
+      FROM users 
+      WHERE email=${email}
+    `;
+    if (adminResult.rows[0]) return adminResult.rows[0];
     
     // If not found, try customers table
-    const customerUser = await sql<User[]>`
+    const customerResult = await sql<User>`
       SELECT 
         id,
         name,
@@ -43,7 +44,7 @@ async function getUser(email: string): Promise<User | undefined> {
       FROM customers 
       WHERE email=${email}
     `;
-    return customerUser[0];
+    return customerResult.rows[0];
   } catch (error) {
     console.error('Failed to fetch user:', error);
     throw new Error('Failed to fetch user.');
