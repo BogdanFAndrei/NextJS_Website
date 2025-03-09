@@ -1,6 +1,7 @@
 'use client';
 
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
+import { useTheme } from '@/app/context/ThemeContext';
 
 const sortOptions = [
   { value: 'name-asc', label: 'Name (A-Z)' },
@@ -17,6 +18,7 @@ export default function CustomerSort() {
   const searchParams = useSearchParams();
   const pathname = usePathname();
   const { replace } = useRouter();
+  const { theme } = useTheme();
 
   function handleSort(sortValue: string) {
     const params = new URLSearchParams(searchParams);
@@ -26,7 +28,7 @@ export default function CustomerSort() {
 
   return (
     <select
-      className="rounded-md border border-gray-200 py-2 px-3 text-sm outline-2 placeholder:text-gray-500"
+      className={`rounded-md border border-${theme.border}-200 py-2 px-3 text-sm outline-2 placeholder:text-${theme.muted}-500 focus:border-${theme.primary}-500 focus:ring-${theme.primary}-500`}
       onChange={(e) => handleSort(e.target.value)}
       value={searchParams.get('sort') || 'name-asc'}
     >
