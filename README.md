@@ -68,7 +68,6 @@ The application features a comprehensive set of modern UI components with dynami
 
 ### Theme System
 - Dynamic theme switching capability
-- Multiple color schemes (Light/Dark modes)
 - Customizable primary colors
 - Consistent styling across all components
 
@@ -87,7 +86,7 @@ The application features a comprehensive set of modern UI components with dynami
 
 - **Interactive Elements**
   - Theme-aware buttons with hover effects
-  - "Add Customer" button with dynamic styling
+  - Buttons with dynamic styling
   - Form inputs with consistent theming
   - Interactive pagination controls
 
