@@ -1,58 +1,78 @@
 'use client';
 
-import React, { createContext, useContext, useEffect, useState } from 'react';
-
-type ThemeColors = {
-  primary: string;
-  hover: string;
-  background: string;
-  text: string;
-  border: string;
-};
+import React, { createContext, useContext, useState, useEffect } from 'react';
 
 type Theme = {
-  theme: ThemeColors;
-  setTheme: (colors: ThemeColors) => void;
+  primary: string;
+  secondary: string;
+  accent: string;
+  background: string;
+  text: string;
+  success: string;
+  error: string;
+  warning: string;
+  info: string;
+  muted: string;
+  border: string;
+  hover: string;
 };
 
-const defaultTheme: ThemeColors = {
-  primary: 'blue-500',
-  hover: 'blue-100',
-  background: 'gray-50',
+const defaultTheme: Theme = {
+  primary: 'blue',
+  secondary: 'gray',
+  accent: 'blue',
+  background: 'white',
   text: 'gray',
-  border: 'gray'
+  success: 'green',
+  error: 'red',
+  warning: 'yellow',
+  info: 'blue',
+  muted: 'gray',
+  border: 'gray',
+  hover: 'blue'
 };
 
-const ThemeContext = createContext<Theme>({
-  theme: defaultTheme,
-  setTheme: () => {},
-});
+type ThemeContextType = {
+  theme: Theme;
+  setTheme: (theme: Theme) => void;
+  applyTheme: (color: string) => void;
+};
+
+const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
-  const [theme, setTheme] = useState<ThemeColors>(defaultTheme);
+  const [theme, setTheme] = useState<Theme>(defaultTheme);
 
-  useEffect(() => {
-    const root = document.documentElement;
-    root.style.setProperty('--blue-500', '#3b82f6');
-    root.style.setProperty('--blue-100', '#dbeafe');
-    root.style.setProperty('--gray-50', '#f9fafb');
-    root.style.setProperty('--red-500', '#ef4444');
-    root.style.setProperty('--red-100', '#fee2e2');
-    root.style.setProperty('--green-500', '#22c55e');
-    root.style.setProperty('--green-100', '#dcfce7');
-    root.style.setProperty('--purple-500', '#a855f7');
-    root.style.setProperty('--purple-100', '#f3e8ff');
-  }, []);
-
-  const updateTheme = (colors: ThemeColors) => {
-    setTheme(colors);
+  const applyTheme = (primaryColor: string) => {
+    const newTheme: Theme = {
+      ...theme,
+      primary: primaryColor,
+      accent: primaryColor,
+      info: primaryColor,
+      hover: primaryColor,
+    };
+    setTheme(newTheme);
+    localStorage.setItem('userTheme', JSON.stringify(newTheme));
   };
 
+  useEffect(() => {
+    const savedTheme = localStorage.getItem('userTheme');
+    if (savedTheme) {
+      setTheme(JSON.parse(savedTheme));
+    }
+  }, []);
+
   return (
-    <ThemeContext.Provider value={{ theme, setTheme: updateTheme }}>
+    <ThemeContext.Provider value={{ theme, setTheme, applyTheme }}>
       {children}
     </ThemeContext.Provider>
   );
 }
 
-export const useTheme = () => useContext(ThemeContext); 
+export function useTheme() {
+  const context = useContext(ThemeContext);
+  if (context === undefined) {
+    throw new Error('useTheme must be used within a ThemeProvider');
+  }
+  return context;
+} 

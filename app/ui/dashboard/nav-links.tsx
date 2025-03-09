@@ -24,13 +24,7 @@ const links = [
 
 export default function NavLinks() {
   const pathname = usePathname();
-  const themeContext = useTheme();
-
-  const linkStyle = {
-    '--theme-primary': `var(--${themeContext.theme.primary})`,
-    '--theme-hover': `var(--${themeContext.theme.hover})`,
-    '--theme-background': `var(--${themeContext.theme.background})`
-  } as React.CSSProperties;
+  const { theme } = useTheme();
 
   return (
     <>
@@ -40,18 +34,16 @@ export default function NavLinks() {
           <Link
             key={link.name}
             href={link.href}
-            style={linkStyle}
             className={clsx(
-              'flex h-[48px] grow items-center justify-center gap-2 rounded-md p-3 text-sm font-medium text-gray-600 md:flex-none md:justify-start md:p-2 md:px-3',
-              'transition-colors duration-200',
-              'hover:bg-[var(--theme-hover)] hover:text-[var(--theme-primary)]',
+              'flex h-[48px] grow items-center justify-center gap-2 rounded-md p-3 text-sm font-medium md:flex-none md:justify-start md:p-2 md:px-3',
               {
-                'bg-[var(--theme-primary)]': pathname === link.href,
-              }
+                [`bg-${theme.primary}-300`]: pathname === link.href,
+                [`hover:bg-${theme.primary}-200`]: pathname !== link.href,
+              },
             )}
           >
-            <LinkIcon className="w-6" />
-            <p className="hidden md:block">{link.name}</p>
+            <LinkIcon className={clsx('w-6 text-black')} />
+            <p className="hidden md:block text-black">{link.name}</p>
           </Link>
         );
       })}
