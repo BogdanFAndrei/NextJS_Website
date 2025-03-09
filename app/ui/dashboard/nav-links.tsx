@@ -35,11 +35,10 @@ export default function NavLinks() {
             key={link.name}
             href={link.href}
             className={clsx(
-              'flex h-[48px] grow items-center justify-center gap-2 rounded-md p-3 text-sm font-medium md:flex-none md:justify-start md:p-2 md:px-3 transition-colors duration-200',
-              {
-                [`bg-${theme.primary}-200`]: pathname === link.href,
-                [`hover:bg-${theme.primary}-100`]: true,
-              },
+              'flex h-[48px] grow items-center justify-center gap-2 rounded-md p-3 text-sm font-medium md:flex-none md:justify-start md:p-2 md:px-3 transition-all duration-200 ease-in-out',
+              pathname === link.href 
+                ? `bg-${theme.primary}-200` 
+                : `hover:bg-${theme.primary}-100 hover:scale-[1.02]`
             )}
           >
             <LinkIcon className={clsx('w-6 text-black')} />
