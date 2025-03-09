@@ -4,24 +4,20 @@ import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { useTheme } from '@/app/context/ThemeContext';
 
 const sortOptions = [
-  { value: 'name-asc', label: 'Name (A-Z)' },
-  { value: 'name-desc', label: 'Name (Z-A)' },
-  { value: 'pending-high', label: 'Highest Pending' },
-  { value: 'pending-low', label: 'Lowest Pending' },
-  { value: 'invoices-high', label: 'Most Invoices' },
-  { value: 'invoices-low', label: 'Least Invoices' },
-  { value: 'paid-high', label: 'Highest Paid' },
-  { value: 'paid-low', label: 'Lowest Paid' },
+  { label: 'Name (A-Z)', value: 'name-asc' },
+  { label: 'Name (Z-A)', value: 'name-desc' },
+  { label: 'Email (A-Z)', value: 'email-asc' },
+  { label: 'Email (Z-A)', value: 'email-desc' },
 ];
 
 export default function CustomerSort() {
-  const searchParams = useSearchParams();
-  const pathname = usePathname();
-  const { replace } = useRouter();
   const { theme } = useTheme();
+  const { replace } = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
 
   function handleSort(sortValue: string) {
-    const params = new URLSearchParams(searchParams);
+    const params = new URLSearchParams(searchParams.toString());
     params.set('sort', sortValue);
     replace(`${pathname}?${params.toString()}`);
   }
@@ -39,4 +35,4 @@ export default function CustomerSort() {
       ))}
     </select>
   );
-} 
+}

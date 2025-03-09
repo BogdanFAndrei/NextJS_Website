@@ -42,6 +42,11 @@ const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const [theme, setTheme] = useState<Theme>(defaultTheme);
+  const [isClient, setIsClient] = useState(false);
+
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
 
   const applyTheme = (primaryColor: string) => {
     const newTheme: Theme = {
@@ -52,15 +57,23 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
       hover: primaryColor,
     };
     setTheme(newTheme);
-    localStorage.setItem('userTheme', JSON.stringify(newTheme));
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('userTheme', JSON.stringify(newTheme));
+    }
   };
 
   useEffect(() => {
-    const savedTheme = localStorage.getItem('userTheme');
-    if (savedTheme) {
-      setTheme(JSON.parse(savedTheme));
+    if (typeof window !== 'undefined') {
+      const savedTheme = localStorage.getItem('userTheme');
+      if (savedTheme) {
+        setTheme(JSON.parse(savedTheme));
+      }
     }
   }, []);
+
+  if (!isClient) {
+    return null;
+  }
 
   return (
     <ThemeContext.Provider value={{ theme, setTheme, applyTheme }}>

@@ -6,15 +6,15 @@ import { useDebouncedCallback } from 'use-debounce';
 import { useTheme } from '@/app/context/ThemeContext';
 
 export default function Search({ placeholder }: { placeholder: string }) {
+  const { theme } = useTheme();
   const searchParams = useSearchParams();
   const pathname = usePathname();
   const { replace } = useRouter();
-  const { theme } = useTheme();
 
   const handleSearch = useDebouncedCallback((term) => {
     console.log(`Searching... ${term}`);
 
-    const params = new URLSearchParams(searchParams);
+    const params = new URLSearchParams(searchParams.toString());
     params.set('page', '1');
     if (term) {
       params.set('query', term);

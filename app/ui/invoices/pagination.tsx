@@ -8,58 +8,54 @@ import { usePathname, useSearchParams } from 'next/navigation';
 import { useTheme } from '@/app/context/ThemeContext';
 
 export default function Pagination({ totalPages }: { totalPages: number }) {
-  // NOTE: Uncomment this code in Chapter 11
+  const { theme } = useTheme();
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const currentPage = Number(searchParams.get('page')) || 1;
+
   const allPages = generatePagination(currentPage, totalPages);
-  const { theme } = useTheme();
 
   const createPageURL = (pageNumber: number | string) => {
-    const params = new URLSearchParams(searchParams);
+    const params = new URLSearchParams(searchParams.toString());
     params.set('page', pageNumber.toString());
     return `${pathname}?${params.toString()}`;
   };
+
   return (
-    <>
-      {/*  NOTE: Uncomment this code in Chapter 11 */}
+    <div className="inline-flex">
+      <PaginationArrow
+        direction="left"
+        href={createPageURL(currentPage - 1)}
+        isDisabled={currentPage <= 1}
+      />
 
-         <div className="inline-flex">
-        <PaginationArrow
-          direction="left"
-          href={createPageURL(currentPage - 1)}
-          isDisabled={currentPage <= 1}
-        />
+      <div className="flex -space-x-px">
+        {allPages.map((page, index) => {
+          let position: 'first' | 'last' | 'single' | 'middle' | undefined;
 
-        <div className="flex -space-x-px">
-          {allPages.map((page, index) => {
-            let position: 'first' | 'last' | 'single' | 'middle' | undefined;
+          if (index === 0) position = 'first';
+          if (index === allPages.length - 1) position = 'last';
+          if (allPages.length === 1) position = 'single';
+          if (page === '...') position = 'middle';
 
-            if (index === 0) position = 'first';
-            if (index === allPages.length - 1) position = 'last';
-            if (allPages.length === 1) position = 'single';
-            if (page === '...') position = 'middle';
+          return (
+            <PaginationNumber
+              key={page}
+              href={createPageURL(page)}
+              page={page}
+              position={position}
+              isActive={currentPage === page}
+            />
+          );
+        })}
+      </div>
 
-            return (
-              <PaginationNumber
-                key={page}
-                href={createPageURL(page)}
-                page={page}
-                position={position}
-                isActive={currentPage === page}
-                theme={theme}
-              />
-            );
-          })}
-        </div>
-
-        <PaginationArrow
-          direction="right"
-          href={createPageURL(currentPage + 1)}
-          isDisabled={currentPage >= totalPages}
-        />
-      </div> 
-    </>
+      <PaginationArrow
+        direction="right"
+        href={createPageURL(currentPage + 1)}
+        isDisabled={currentPage >= totalPages}
+      />
+    </div>
   );
 }
 
@@ -68,21 +64,20 @@ function PaginationNumber({
   href,
   isActive,
   position,
-  theme,
 }: {
   page: number | string;
   href: string;
   position?: 'first' | 'last' | 'middle' | 'single';
   isActive: boolean;
-  theme: any;
 }) {
+  const { theme } = useTheme();
   const className = clsx(
     'flex h-10 w-10 items-center justify-center text-sm border',
     {
       'rounded-l-md': position === 'first' || position === 'single',
       'rounded-r-md': position === 'last' || position === 'single',
-      [`z-10 bg-${theme.primary}-600 border-${theme.primary}-600 text-white`]: isActive,
-      [`hover:bg-${theme.primary}-100`]: !isActive && position !== 'middle',
+      'z-10 bg-blue-600 border-blue-600 text-white': isActive,
+      'hover:bg-gray-100': !isActive && position !== 'middle',
       'text-gray-300': position === 'middle',
     },
   );
@@ -105,6 +100,7 @@ function PaginationArrow({
   direction: 'left' | 'right';
   isDisabled?: boolean;
 }) {
+  const { theme } = useTheme();
   const className = clsx(
     'flex h-10 w-10 items-center justify-center rounded-md border',
     {
@@ -115,12 +111,11 @@ function PaginationArrow({
     },
   );
 
-  const icon =
-    direction === 'left' ? (
-      <ArrowLeftIcon className="w-4" />
-    ) : (
-      <ArrowRightIcon className="w-4" />
-    );
+  const icon = direction === 'left' ? (
+    <ArrowLeftIcon className="w-4" />
+  ) : (
+    <ArrowRightIcon className="w-4" />
+  );
 
   return isDisabled ? (
     <div className={className}>{icon}</div>

@@ -8,12 +8,12 @@ import {
 } from '@heroicons/react/24/outline';
 import { Button } from '@/app/ui/button';
 import { createCustomer } from '@/app/lib/actions';
-import { useActionState } from 'react';
+import { useFormState } from 'react-dom';
 import { CustomerState } from '@/app/lib/actions';
 
 export default function Form() {
-  const initialState: CustomerState = { message: '', errors: { name: [], email: [] } };
-  const [state, dispatch] = useActionState(createCustomer, initialState);
+  const initialState: CustomerState = { message: null, errors: {} };
+  const [state, dispatch] = useFormState(createCustomer, initialState);
 
   return (
     <form action={dispatch}>

@@ -53,38 +53,57 @@ export function Card({
   type: 'invoices' | 'customers' | 'pending' | 'collected';
 }) {
   const Icon = iconMap[type];
-  const { theme } = useTheme();
 
-  const getCardColor = (type: string) => {
+  const getCardClasses = (type: string) => {
     switch (type) {
       case 'collected':
-        return theme.success;
+        return {
+          icon: 'text-green-500',
+          text: 'text-gray-500',
+          value: 'text-gray-900'
+        };
       case 'pending':
-        return theme.warning;
+        return {
+          icon: 'text-yellow-500',
+          text: 'text-gray-500',
+          value: 'text-gray-900'
+        };
       case 'invoices':
-        return theme.info;
+        return {
+          icon: 'text-blue-500',
+          text: 'text-gray-500',
+          value: 'text-gray-900'
+        };
       case 'customers':
-        return theme.primary;
+        return {
+          icon: 'text-blue-500',
+          text: 'text-gray-500',
+          value: 'text-gray-900'
+        };
       default:
-        return theme.secondary;
+        return {
+          icon: 'text-gray-500',
+          text: 'text-gray-500',
+          value: 'text-gray-900'
+        };
     }
   };
 
-  const cardColor = getCardColor(type);
+  const classes = getCardClasses(type);
 
   return (
-    <div className={`rounded-xl bg-${theme.background} p-2 shadow-sm ring-1 ring-${theme.border}-100`}>
+    <div className="rounded-xl bg-white p-2 shadow-sm ring-1 ring-gray-100">
       <div className="flex p-4">
         {Icon ? (
-          <Icon className={`h-5 w-5 text-${cardColor}-500`} />
+          <Icon className={`h-5 w-5 ${classes.icon}`} />
         ) : null}
-        <h3 className={`ml-2 text-sm font-medium text-${theme.text}-500`}>
+        <h3 className={`ml-2 text-sm font-medium ${classes.text}`}>
           {title}
         </h3>
       </div>
       <p
         className={`${lusitana.className}
-          truncate rounded-xl bg-${theme.background} px-4 py-8 text-center text-2xl text-${theme.text}-900`}
+          truncate rounded-xl bg-white px-4 py-8 text-center text-2xl ${classes.value}`}
       >
         {value}
       </p>
