@@ -3,36 +3,42 @@
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { useTheme } from '@/app/context/ThemeContext';
 
-const sortOptions = [
-  { label: 'Name (A-Z)', value: 'name-asc' },
-  { label: 'Name (Z-A)', value: 'name-desc' },
-  { label: 'Email (A-Z)', value: 'email-asc' },
-  { label: 'Email (Z-A)', value: 'email-desc' },
-];
-
 export default function CustomerSort() {
   const { theme } = useTheme();
-  const { replace } = useRouter();
-  const pathname = usePathname();
   const searchParams = useSearchParams();
+  const pathname = usePathname();
+  const { replace } = useRouter();
 
-  function handleSort(sortValue: string) {
-    const params = new URLSearchParams(searchParams.toString());
-    params.set('sort', sortValue);
+  function handleSort(sortBy: string) {
+    const params = new URLSearchParams(searchParams?.toString() || '');
+    params.set('sort', sortBy);
     replace(`${pathname}?${params.toString()}`);
   }
 
   return (
-    <select
-      className={`rounded-md border border-${theme.border}-200 py-2 px-3 text-sm outline-2 placeholder:text-${theme.muted}-500 focus:border-${theme.primary}-500 focus:ring-${theme.primary}-500`}
-      onChange={(e) => handleSort(e.target.value)}
-      value={searchParams.get('sort') || 'name-asc'}
-    >
-      {sortOptions.map((option) => (
-        <option key={option.value} value={option.value}>
-          {option.label}
-        </option>
-      ))}
-    </select>
+    <div className="relative">
+      <select
+        className={`block rounded-md border border-gray-200 px-4 py-2 text-sm outline-2 outline-offset-2 outline-${theme.primary}-500`}
+        onChange={(e) => handleSort(e.target.value)}
+        value={searchParams?.get('sort') || 'name-asc'}
+      >
+        <optgroup label="Name">
+          <option value="name-asc">Name (A-Z)</option>
+          <option value="name-desc">Name (Z-A)</option>
+        </optgroup>
+        <optgroup label="Invoices">
+          <option value="invoices-high">Most Invoices</option>
+          <option value="invoices-low">Least Invoices</option>
+        </optgroup>
+        <optgroup label="Money Owed">
+          <option value="pending-high">Highest Pending Amount</option>
+          <option value="pending-low">Lowest Pending Amount</option>
+        </optgroup>
+        <optgroup label="Money Paid">
+          <option value="paid-high">Highest Paid Amount</option>
+          <option value="paid-low">Lowest Paid Amount</option>
+        </optgroup>
+      </select>
+    </div>
   );
 }
