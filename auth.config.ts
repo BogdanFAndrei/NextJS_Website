@@ -10,20 +10,23 @@ import { z } from 'zod';
 import { sql } from '@vercel/postgres';
 import bcrypt from 'bcryptjs';
 
+type UserRole = 'customer' | 'admin';
+
 export const authConfig = {
   pages: {
     signIn: '/login',
+    signOut: '/', // Set default sign-out page to home
   },
   callbacks: {
     async jwt({ token, user }) {
       if (user) {
-        token.role = user.role;
+        token.role = user.role as UserRole;
       }
       return token;
     },
     async session({ session, token }) {
       if (session?.user) {
-        session.user.role = token.role;
+        session.user.role = token.role as UserRole;
       }
       return session;
     },
@@ -96,7 +99,7 @@ export const authConfig = {
           id: user.rows[0].id,
           email: user.rows[0].email,
           name: user.rows[0].name,
-          role: user.rows[0].role || 'customer', // Default to customer if no role specified
+          role: (user.rows[0].role || 'customer') as UserRole, // Default to customer if no role specified
         };
       },
     }),
