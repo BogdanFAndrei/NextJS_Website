@@ -15,6 +15,7 @@ import { signIn, signOut } from '@/auth';
 import { AuthError } from 'next-auth';
 import bcrypt from 'bcryptjs';
 import sql from './db';
+import { sql as vercelSql } from '@vercel/postgres';
 
 // Form validation schemas
 const FormSchema = z.object({
@@ -35,6 +36,22 @@ const FormSchema = z.object({
 
 const CreateInvoice = FormSchema.omit({ id: true, date: true });
 const UpdateInvoice = FormSchema.omit({ id: true, date: true });
+
+const UpdateCustomer = z.object({
+  id: z.string(),
+  name: z.string().min(1, "Name is required"),
+  email: z.string().email("Invalid email address"),
+});
+
+const UpdatePassword = z.object({
+  id: z.string(),
+  currentPassword: z.string().min(6, "Current password is required"),
+  newPassword: z.string().min(6, "Password must be at least 6 characters"),
+  confirmPassword: z.string().min(6, "Please confirm your password"),
+}).refine((data) => data.newPassword === data.confirmPassword, {
+  message: "Passwords don't match",
+  path: ["confirmPassword"],
+});
 
 // Define the shape of validation errors
 export type State = {
@@ -203,6 +220,113 @@ export async function createCustomer(prevState: CustomerState, formData: FormDat
     console.error('Error creating customer:', error);
     return {
       message: error instanceof Error ? error.message : 'Database Error: Failed to Create Customer.',
+    };
+  }
+}
+
+export async function updateCustomerProfile(id: string, formData: FormData) {
+  const validatedFields = UpdateCustomer.safeParse({
+    id,
+    name: formData.get('name'),
+    email: formData.get('email'),
+  });
+
+  if (!validatedFields.success) {
+    return {
+      errors: validatedFields.error.flatten().fieldErrors,
+      message: 'Missing or invalid fields. Failed to update profile.',
+    };
+  }
+
+  const { name, email } = validatedFields.data;
+
+  try {
+    await vercelSql`
+      UPDATE customers
+      SET name = ${name}, email = ${email}
+      WHERE id = ${id}
+    `;
+
+    // Also update the users table to keep email in sync
+    await vercelSql`
+      UPDATE users
+      SET name = ${name}, email = ${email}
+      WHERE email = ${email}
+    `;
+
+    revalidatePath('/customers/profile');
+    return { message: 'Profile updated successfully.' };
+  } catch (error) {
+    return {
+      message: 'Database Error: Failed to update profile.',
+    };
+  }
+}
+
+export async function updateCustomerPassword(id: string, formData: FormData) {
+  const validatedFields = UpdatePassword.safeParse({
+    id,
+    currentPassword: formData.get('currentPassword'),
+    newPassword: formData.get('newPassword'),
+    confirmPassword: formData.get('confirmPassword'),
+  });
+
+  if (!validatedFields.success) {
+    return {
+      errors: validatedFields.error.flatten().fieldErrors,
+      message: 'Please check your password inputs.',
+    };
+  }
+
+  const { currentPassword, newPassword } = validatedFields.data;
+
+  try {
+    // First verify the current password
+    const user = await sql`
+      SELECT password FROM customers WHERE id = ${id}
+    `;
+
+    if (!user.rows[0]) {
+      return {
+        message: 'User not found.',
+      };
+    }
+
+    const passwordMatch = await bcrypt.compare(currentPassword, user.rows[0].password);
+    if (!passwordMatch) {
+      return {
+        message: 'Current password is incorrect.',
+      };
+    }
+
+    // Check if new password is same as current password
+    if (currentPassword === newPassword) {
+      return {
+        message: 'New password must be different from your current password.',
+      };
+    }
+
+    // Hash the new password
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+    // Update both customers and users tables
+    await sql`
+      UPDATE customers
+      SET password = ${hashedPassword}
+      WHERE id = ${id}
+    `;
+
+    await sql`
+      UPDATE users
+      SET password = ${hashedPassword}
+      WHERE email = (SELECT email FROM customers WHERE id = ${id})
+    `;
+
+    return { message: 'Password updated successfully.' };
+  } catch (error) {
+    console.error('Error updating password:', error);
+    return {
+      message: 'Database Error: Failed to update password.',
     };
   }
 }

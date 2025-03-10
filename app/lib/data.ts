@@ -231,7 +231,7 @@ export async function fetchFilteredCustomers(query: string) {
       return [];
     }
 
-    const data = await sql<CustomersTableType>`
+    const data = await sql.query<CustomersTableType>(`
       SELECT
         customers.id,
         customers.name,
@@ -242,14 +242,10 @@ export async function fetchFilteredCustomers(query: string) {
         SUM(CASE WHEN invoices.status = 'paid' THEN invoices.amount ELSE 0 END) AS total_paid
       FROM customers
       LEFT JOIN invoices ON customers.id = invoices.customer_id
-      WHERE 
-        customers.email = ${session.user.email}
-        ${query ? sql`AND (
-          customers.name ILIKE ${`%${query}%`} OR
-          customers.email ILIKE ${`%${query}%`}
-        )` : sql``}
+      WHERE customers.email = $1
+      ${query ? `AND (customers.name ILIKE $2 OR customers.email ILIKE $2)` : ''}
       GROUP BY customers.id, customers.name, customers.email, customers.image_url
-    `;
+    `, [session.user.email, query ? `%${query}%` : null].filter(Boolean));
 
     const customers = data.rows.map((customer) => ({
       ...customer,

@@ -1,5 +1,6 @@
 import CustomerNav from '@/app/ui/customers/nav';
 import { Metadata } from 'next';
+import ThemeCustomizer from '@/app/ui/theme-customizer';
 
 export const metadata: Metadata = {
   title: {
@@ -15,7 +16,10 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       <div className="w-full flex-none md:w-64">
         <CustomerNav />
       </div>
-      <div className="flex-grow p-6 md:overflow-y-auto md:p-12">{children}</div>
+      <div className="flex-grow p-6 md:overflow-y-auto md:p-12">
+        {children}
+        <ThemeCustomizer />
+      </div>
     </div>
   );
 } 
