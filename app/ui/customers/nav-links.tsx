@@ -1,20 +1,28 @@
 'use client';
 
 import {
-  UserIcon,
+  UserCircleIcon,
+  HomeIcon,
   DocumentDuplicateIcon,
 } from '@heroicons/react/24/outline';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import clsx from 'clsx';
+import { useTheme } from '@/app/context/ThemeContext';
 
 const links = [
-  { name: 'Profile', href: '/customers', icon: UserIcon },
-  { name: 'Invoices', href: '/customers/invoices', icon: DocumentDuplicateIcon },
+  { name: 'Home', href: '/customers', icon: HomeIcon },
+  { name: 'Profile', href: '/customers/profile', icon: UserCircleIcon },
+  {
+    name: 'Invoices',
+    href: '/customers/invoices',
+    icon: DocumentDuplicateIcon,
+  },
 ];
 
 export default function NavLinks() {
   const pathname = usePathname();
+  const { theme } = useTheme();
 
   return (
     <>
@@ -25,14 +33,14 @@ export default function NavLinks() {
             key={link.name}
             href={link.href}
             className={clsx(
-              'flex h-[48px] grow items-center justify-center gap-2 rounded-md bg-gray-50 p-3 text-sm font-medium hover:bg-sky-100 hover:text-blue-600 md:flex-none md:justify-start md:p-2 md:px-3',
-              {
-                'bg-sky-100 text-blue-600': pathname === link.href,
-              },
+              'flex h-[48px] grow items-center justify-center gap-2 rounded-md p-3 text-sm font-medium md:flex-none md:justify-start md:p-2 md:px-3 transition-all duration-200 ease-in-out',
+              pathname === link.href 
+                ? `bg-${theme.primary}-200` 
+                : `hover:bg-${theme.primary}-100 hover:scale-[1.02]`
             )}
           >
-            <LinkIcon className="w-6" />
-            <p className="hidden md:block">{link.name}</p>
+            <LinkIcon className={clsx('w-6 text-black')} />
+            <p className="hidden md:block text-black">{link.name}</p>
           </Link>
         );
       })}
