@@ -3,6 +3,10 @@ import { UpdateInvoice, DeleteInvoiceWithForm } from '@/app/ui/invoices/buttons'
 import InvoiceStatus from '@/app/ui/invoices/status';
 import { formatDateToLocal, formatCurrency } from '@/app/lib/utils';
 import { fetchFilteredInvoices } from '@/app/lib/data';
+import { auth } from '@/auth';
+import Link from 'next/link';
+import { Button } from '@/app/ui/button';
+import { CreditCardIcon } from '@heroicons/react/24/outline';
 
 export default async function InvoicesTable({
   query,
@@ -12,6 +16,9 @@ export default async function InvoicesTable({
   currentPage: number;
 }) {
   const invoices = await fetchFilteredInvoices(query, currentPage);
+  const session = await auth();
+  const isAdmin = session?.user?.role === 'admin';
+  const isCustomer = session?.user?.role === 'customer';
 
   return (
     <div className="mt-6 flow-root">
@@ -46,9 +53,21 @@ export default async function InvoicesTable({
                     </p>
                     <p>{formatDateToLocal(invoice.date)}</p>
                   </div>
-                  <div className="flex justify-end gap-2">
-                    <UpdateInvoice id={invoice.id} />
-                    <DeleteInvoiceWithForm id={invoice.id} />
+                  <div className="flex gap-2">
+                    {isCustomer && invoice.status === 'pending' && (
+                      <Link href={`/customers/invoices/${invoice.id}/pay`}>
+                        <Button className="flex items-center gap-1">
+                          <CreditCardIcon className="w-4" />
+                          Pay
+                        </Button>
+                      </Link>
+                    )}
+                    {isAdmin && (
+                      <div className="flex justify-end gap-2">
+                        <UpdateInvoice id={invoice.id} />
+                        <DeleteInvoiceWithForm id={invoice.id} />
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>
@@ -73,7 +92,7 @@ export default async function InvoicesTable({
                   Status
                 </th>
                 <th scope="col" className="relative py-3 pl-6 pr-3">
-                  <span className="sr-only">Edit</span>
+                  <span className="sr-only">Actions</span>
                 </th>
               </tr>
             </thead>
@@ -109,8 +128,20 @@ export default async function InvoicesTable({
                   </td>
                   <td className="whitespace-nowrap py-3 pl-6 pr-3">
                     <div className="flex justify-end gap-3">
-                      <UpdateInvoice id={invoice.id} />
-                      <DeleteInvoiceWithForm id={invoice.id} />
+                      {isCustomer && invoice.status === 'pending' && (
+                        <Link href={`/customers/invoices/${invoice.id}/pay`}>
+                          <Button className="flex items-center gap-1">
+                            <CreditCardIcon className="w-4" />
+                            Pay
+                          </Button>
+                        </Link>
+                      )}
+                      {isAdmin && (
+                        <>
+                          <UpdateInvoice id={invoice.id} />
+                          <DeleteInvoiceWithForm id={invoice.id} />
+                        </>
+                      )}
                     </div>
                   </td>
                 </tr>
