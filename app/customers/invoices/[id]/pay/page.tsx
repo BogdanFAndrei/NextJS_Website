@@ -5,6 +5,7 @@ import { lusitana } from '@/app/ui/fonts';
 import Link from 'next/link';
 import { Button } from '@/app/ui/button';
 import { ArrowLeftIcon } from '@heroicons/react/24/outline';
+import { formatCurrency } from '@/app/lib/utils';
 
 export const metadata: Metadata = {
   title: 'Make Payment | Customer Portal',
@@ -42,7 +43,7 @@ export default async function Page({ params }: { params: { id: string } }) {
           <div className="border-t pt-4">
             <div className="flex justify-between mb-2">
               <span className="font-medium">Invoice Amount:</span>
-              <span className="text-gray-900">${(invoice.amount / 100).toFixed(2)}</span>
+              <span className="text-gray-900">{formatCurrency(invoice.amount * 100)}</span>
             </div>
             <div className="flex justify-between">
               <span className="font-medium">Status:</span>
