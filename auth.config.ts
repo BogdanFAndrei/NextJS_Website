@@ -5,64 +5,64 @@
  */
 
 import type { NextAuthConfig } from 'next-auth';
-import type { JWT } from 'next-auth/jwt';
-
-interface ExtendedToken extends JWT {
-  role?: 'admin' | 'customer';
-}
+import Credentials from 'next-auth/providers/credentials';
+import { z } from 'zod';
+import { sql } from '@vercel/postgres';
+import bcrypt from 'bcryptjs';
 
 export const authConfig = {
   pages: {
     signIn: '/login',
   },
   callbacks: {
-    async jwt({ token, user }) {
-      if (user) {
-        token.role = user.role;
-      }
-      return token;
-    },
-    async session({ session, token }: { session: any; token: any }) {
-      if (session?.user) {
-        session.user.role = token.role;
-      }
-      return session;
-    },
     authorized({ auth, request: { nextUrl } }) {
       const isLoggedIn = !!auth?.user;
       const isOnDashboard = nextUrl.pathname.startsWith('/dashboard');
-      const isOnCustomerPage = nextUrl.pathname.startsWith('/customers');
-      const isOnLoginPage = nextUrl.pathname === '/login';
+      const isOnCustomers = nextUrl.pathname.startsWith('/customers');
       
-      // If not logged in and trying to access protected routes
-      if (!isLoggedIn && (isOnDashboard || isOnCustomerPage)) {
-        return false; // Redirect to login
+      if (isOnDashboard || isOnCustomers) {
+        if (isLoggedIn) return true;
+        return false;
       }
-
-      // If logged in and trying to access login page
-      if (isLoggedIn && isOnLoginPage) {
-        // Redirect based on role
-        if (auth.user.role === 'customer') {
-          return Response.redirect(new URL('/customers', nextUrl));
-        }
-        return Response.redirect(new URL('/dashboard', nextUrl));
-      }
-
-      // Role-based access control
-      if (isLoggedIn) {
-        // Customer trying to access admin dashboard
-        if (auth.user.role === 'customer' && isOnDashboard) {
-          return Response.redirect(new URL('/customers', nextUrl));
-        }
-        // Admin trying to access customer pages
-        if (auth.user.role === 'admin' && isOnCustomerPage) {
-          return Response.redirect(new URL('/dashboard', nextUrl));
-        }
-      }
-
       return true;
     },
   },
-  providers: [], // configured in auth.ts
-  secret: process.env.AUTH_SECRET,
+  providers: [
+    Credentials({
+      async authorize(credentials) {
+        const parsedCredentials = z
+          .object({ email: z.string().email(), password: z.string().min(6) })
+          .safeParse(credentials);
+
+        if (!parsedCredentials.success) {
+          return null;
+        }
+
+        const { email, password } = parsedCredentials.data;
+
+        const user = await sql`
+          SELECT * FROM users WHERE email = ${email}
+        `;
+
+        if (!user.rows[0]) {
+          return null;
+        }
+
+        const passwordsMatch = await bcrypt.compare(
+          password,
+          user.rows[0].password
+        );
+
+        if (!passwordsMatch) {
+          return null;
+        }
+
+        return {
+          id: user.rows[0].id,
+          email: user.rows[0].email,
+          name: user.rows[0].name,
+        };
+      },
+    }),
+  ],
 } satisfies NextAuthConfig; 
