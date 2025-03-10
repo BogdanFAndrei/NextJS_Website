@@ -15,15 +15,50 @@ export const authConfig = {
     signIn: '/login',
   },
   callbacks: {
+    async jwt({ token, user }) {
+      if (user) {
+        token.role = user.role;
+      }
+      return token;
+    },
+    async session({ session, token }) {
+      if (session?.user) {
+        session.user.role = token.role;
+      }
+      return session;
+    },
     authorized({ auth, request: { nextUrl } }) {
       const isLoggedIn = !!auth?.user;
       const isOnDashboard = nextUrl.pathname.startsWith('/dashboard');
       const isOnCustomers = nextUrl.pathname.startsWith('/customers');
+      const isOnLoginPage = nextUrl.pathname === '/login';
       
-      if (isOnDashboard || isOnCustomers) {
-        if (isLoggedIn) return true;
-        return false;
+      // If not logged in and trying to access protected routes
+      if (!isLoggedIn && (isOnDashboard || isOnCustomers)) {
+        return false; // Redirect to login
       }
+
+      // If logged in and trying to access login page
+      if (isLoggedIn && isOnLoginPage) {
+        // Redirect based on role
+        if (auth.user.role === 'customer') {
+          return Response.redirect(new URL('/customers', nextUrl));
+        }
+        return Response.redirect(new URL('/dashboard', nextUrl));
+      }
+
+      // Role-based access control
+      if (isLoggedIn) {
+        // Customer trying to access admin dashboard
+        if (auth.user.role === 'customer' && isOnDashboard) {
+          return Response.redirect(new URL('/customers', nextUrl));
+        }
+        // Admin trying to access customer pages
+        if (auth.user.role === 'admin' && isOnCustomers) {
+          return Response.redirect(new URL('/dashboard', nextUrl));
+        }
+      }
+
       return true;
     },
   },
@@ -61,6 +96,7 @@ export const authConfig = {
           id: user.rows[0].id,
           email: user.rows[0].email,
           name: user.rows[0].name,
+          role: user.rows[0].role || 'customer', // Default to customer if no role specified
         };
       },
     }),

@@ -28,7 +28,7 @@ async function seedUsers() {
         name VARCHAR(255) NOT NULL,
         email TEXT NOT NULL UNIQUE,
         password TEXT NOT NULL,
-        role VARCHAR(50) NOT NULL DEFAULT 'admin'
+        role VARCHAR(50) NOT NULL DEFAULT 'customer'
       );
     `;
 
@@ -36,9 +36,13 @@ async function seedUsers() {
     const insertedUsers = await Promise.all(
       users.map(async (user) => {
         const hashedPassword = await bcrypt.hash(user.password, 10);
+        // Check if the email matches any customer email
+        const isCustomer = customers.some(customer => customer.email === user.email);
+        const role = isCustomer ? 'customer' : 'admin';
+        
         return sql`
           INSERT INTO users (id, name, email, password, role)
-          VALUES (${user.id}, ${user.name}, ${user.email}, ${hashedPassword}, 'admin')
+          VALUES (${user.id}, ${user.name}, ${user.email}, ${hashedPassword}, ${role})
           ON CONFLICT (id) DO NOTHING;
         `;
       }),
