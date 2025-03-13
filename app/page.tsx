@@ -20,10 +20,10 @@ export default function Page() {
         <div className={`flex flex-col justify-center gap-6 rounded-lg bg-${theme.background} px-6 py-10 md:w-2/5 md:px-20 shadow-md ring-1 ring-${theme.border}-100`}>
           <div className="h-0 w-0 border-b-[30px] border-l-[20px] border-r-[20px] border-b-black border-l-transparent border-r-transparent" />
           <p className={`${lusitana.className} text-xl text-${theme.text}-800 md:text-3xl md:leading-normal`}>
-            <strong>Welcome to my Demo website</strong>
+            <strong>Welcome to InvoiceNexus</strong>
           </p>
           <p className={`${lusitana.className} text-xl text-${theme.text}-800 md:text-3xl md:leading-normal -mt-4`}>
-            I will be using this website to test different test frameworks.
+            The place where we make Invoices smarter.
           </p>
           <Link
             href="/login"
