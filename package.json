@@ -1,0 +1,38 @@
+{
+  "private": true,
+  "scripts": {
+    "build": "next build",
+    "dev": "next dev",
+    "start": "next start",
+    "seed": "node scripts/seed.js",
+    "postbuild": "curl -X GET $VERCEL_URL/seed",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "@heroicons/react": "^2.2.0",
+    "@tailwindcss/forms": "^0.5.10",
+    "@types/bcryptjs": "^2.4.6",
+    "@vercel/postgres": "^0.10.0",
+    "autoprefixer": "10.4.21",
+    "bcryptjs": "^2.4.3",
+    "clsx": "^2.1.1",
+    "dotenv": "^16.4.7",
+    "next": "15.2.1",
+    "next-auth": "5.0.0-beta.25",
+    "postcss": "8.4.31",
+    "postgres": "^3.4.5",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "react-error-boundary": "^5.0.0",
+    "tailwindcss": "3.4.1",
+    "typescript": "5.8.2",
+    "use-debounce": "^10.0.4",
+    "zod": "^3.24.2"
+  },
+  "devDependencies": {
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "@types/react-dom": "19.0.4",
+    "null-loader": "^4.0.1"
+  }
+}
